@@ -1,0 +1,89 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:secure_storage/key_storage/keystore_facade.dart';
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  if (!Platform.isAndroid) {
+    debugPrint(
+      '$KeystoreFacade integration tests run only on Android. Skipping.',
+    );
+    return;
+  }
+
+  group('$KeystoreFacade (Android)', () {
+    late KeystoreFacade facade;
+    const alias = 'integration_test_keystore_facade_key';
+    final plaintext = Uint8List.fromList(
+      utf8.encode('plaintext for keystore facade'),
+    );
+    const aad = 'test_aad';
+
+    setUpAll(() {
+      facade = KeystoreFacade();
+    });
+
+    tearDown(() async => await facade.deleteEntry(alias));
+    testWidgets('containsAlias returns false when alias does not exist', (
+      tester,
+    ) async {
+      final exists = await facade.containsAlias(alias);
+      expect(exists, isFalse);
+    });
+
+    testWidgets('generateKey creates key and containsAlias returns true', (
+      tester,
+    ) async {
+      await facade.generateKey(alias: alias, unlockedDeviceRequired: false);
+      final exists = await facade.containsAlias(alias);
+      expect(exists, isTrue);
+    });
+
+    testWidgets('encrypt returns nonce and ciphertext', (tester) async {
+      await facade.generateKey(alias: alias, unlockedDeviceRequired: false);
+      final payload = await facade.encrypt(
+        alias: alias,
+        plaintext: plaintext,
+        aad: aad,
+      );
+      expect(payload.nonce.length, 12);
+      expect(payload.ciphertext.length, greaterThan(0));
+    });
+
+    testWidgets('decrypt recovers plaintext after encrypt', (tester) async {
+      await facade.generateKey(alias: alias, unlockedDeviceRequired: false);
+      final encrypted = await facade.encrypt(
+        alias: alias,
+        plaintext: plaintext,
+        aad: aad,
+      );
+      final decrypted = await facade.decrypt(
+        alias: alias,
+        ciphertext: encrypted.ciphertext,
+        nonce: encrypted.nonce,
+        aad: aad,
+      );
+      expect(decrypted, equals(plaintext));
+    });
+
+    testWidgets('isStrongBoxAvailable returns bool', (tester) async {
+      final available = await facade.isStrongBoxAvailable();
+      expect(available, isA<bool>());
+    });
+
+    testWidgets('deleteEntry removes key and containsAlias returns false', (
+      tester,
+    ) async {
+      await facade.generateKey(alias: alias, unlockedDeviceRequired: false);
+      expect(await facade.containsAlias(alias), isTrue);
+      await facade.deleteEntry(alias);
+      final exists = await facade.containsAlias(alias);
+      expect(exists, isFalse);
+    });
+  });
+}
