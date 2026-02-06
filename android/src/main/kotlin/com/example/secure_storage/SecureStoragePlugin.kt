@@ -36,7 +36,6 @@ class SecureStoragePlugin : FlutterPlugin, MethodCallHandler {
 
   override fun onMethodCall(call: MethodCall, result: Result) {
     when (call.method) {
-      "getPlatformVersion" -> result.success("Android ${android.os.Build.VERSION.RELEASE}")
       "containsAlias" -> handleContainsAlias(call, result)
       "generateKey" -> handleGenerateKey(call, result)
       "deleteEntry" -> handleDeleteEntry(call, result)

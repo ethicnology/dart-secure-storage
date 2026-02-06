@@ -1,15 +1,75 @@
 # secure_storage
 
-A new Flutter plugin project.
+Flutter plugin to store sensitive data (bytes) on iOS and Android using each platform’s secure backing store.
 
-## Getting Started
+- **iOS:** Values are stored in the [Keychain](https://developer.apple.com/documentation/security/keychain_services) (generic password items). Data is protected by the system; no extra encryption layer in the plugin.
+- **Android:** A non-exportable AES-256-GCM key is created in [Android Keystore](https://developer.android.com/training/articles/keystore). Values are encrypted in native code with that key and the encrypted payload is stored in SharedPreferences. The secret never sits in plain text in app storage.
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/to/develop-plugins),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+## API
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Values are **bytes** (`Uint8List`). Keys are strings.
 
+| Method | Description |
+|--------|-------------|
+| `store(key, value)` | Store bytes under `key`. Overwrites if the key exists. |
+| `fetch(key)` | Return the stored bytes, or `null` if not found. |
+| `trash(key)` | Remove the entry for `key`. |
+| `exists(key)` | Return whether a value exists for `key`. |
+| `storeString(key, value)` | Convenience: store a UTF-8 string (same as `store(key, utf8.encode(value))`). |
+| `fetchString(key)` | Convenience: fetch and decode as UTF-8 string, or `null`. |
+
+For Android, a single Keystore key is used for all entries (default alias: `secure_storage_default`). You can pass a custom `keyAlias` to `createSecureStorage()` if needed.
+
+## Usage
+
+```dart
+import 'dart:convert';
+import 'package:secure_storage/secure_storage.dart';
+
+final storage = createSecureStorage();
+
+// Bytes (e.g. tokens, keys, binary)
+await storage.store('api_token', Uint8List.fromList(utf8.encode('eyJ...')));
+final tokenBytes = await storage.fetch('api_token');
+
+// Or use string helpers (UTF-8)
+await storage.storeString('api_token', 'eyJ...');
+final token = await storage.fetchString('api_token');
+
+await storage.trash('api_token');
+```
+
+## Setup
+
+Add the dependency:
+
+```yaml
+dependencies:
+  secure_storage:
+    path: ../path/to/secure_storage  # or use git/version
+```
+
+- **Android:** Requires `minSdkVersion` 29 or higher (Keystore API used by the plugin).
+- **iOS:** No extra setup. Keychain is available by default.
+
+## Example
+
+The `example/` app demonstrates saving, loading, and deleting a secret with a simple UI and a short explanation of where data is stored on each platform.
+
+Run it with:
+
+```bash
+cd example && flutter run
+```
+
+## Integration tests
+
+Integration tests (including the end-user API: `createSecureStorage`, `store`/`fetch`, `storeString`/`fetchString`, `trash`, `exists`) live in `example/integration_test/`. Run them from the example app on a device or simulator:
+
+```bash
+cd example && flutter test integration_test/
+```
+
+## License
+
+See the repository for license information.

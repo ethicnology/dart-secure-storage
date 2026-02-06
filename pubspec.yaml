@@ -5,14 +5,17 @@ homepage:
 
 environment:
   sdk: ^3.10.4
-  flutter: '>=3.3.0'
+  flutter: ">=3.3.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.0.2
+  dart_mappable: ^4.6.1
+  shared_preferences: ^2.5.4
 
 dev_dependencies:
+  build_runner: ^2.4.13
+  dart_mappable_builder: ^4.6.1
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0

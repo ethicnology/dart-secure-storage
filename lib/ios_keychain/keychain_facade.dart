@@ -24,6 +24,7 @@ class KeychainFacade {
       'alias': alias,
     });
     if (result != null) return result;
+
     throw PlatformException(
       code: 'keychain_contains_failed',
       message: 'Native keychain contains returned null.',

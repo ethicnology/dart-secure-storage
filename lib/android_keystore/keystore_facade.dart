@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 
-import 'package:secure_storage/cipher/encrypted_payload.dart';
+import 'package:secure_storage/android_keystore/encrypted_payload.dart';
 
 class KeystoreFacade {
   final MethodChannel _channel = const MethodChannel('secure_storage');
