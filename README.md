@@ -1,8 +1,9 @@
 # secure_storage
 
-Flutter plugin to store sensitive data (bytes) on iOS and Android using each platform’s secure backing store.
+Flutter plugin to store sensitive data (bytes) on iOS, macOS, and Android using each platform’s secure backing store.
 
 - **iOS:** Values are stored in the [Keychain](https://developer.apple.com/documentation/security/keychain_services) (generic password items). Data is protected by the system; no extra encryption layer in the plugin.
+- **macOS:** Values are stored in the system Keychain (traditional file-based keychain). No entitlements or code signing are required; the plugin works out of the box. Data is encrypted at rest and protected by the system.
 - **Android:** A non-exportable AES-256-GCM key is created in [Android Keystore](https://developer.android.com/training/articles/keystore). Values are encrypted in native code with that key and the encrypted payload is stored in SharedPreferences. The secret never sits in plain text in app storage.
 
 ## API
@@ -51,6 +52,7 @@ dependencies:
 
 - **Android:** Requires `minSdkVersion` 29 or higher (Keystore API used by the plugin).
 - **iOS:** No extra setup. Keychain is available by default.
+- **macOS:** No extra setup. The plugin uses the traditional keychain (no `keychain-access-groups` entitlement or development team required). To use the Data Protection keychain (iOS-style) instead, add the `keychain-access-groups` entitlement and sign the app with a team (free Apple ID may work for development).
 
 ## Example
 

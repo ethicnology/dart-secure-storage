@@ -9,14 +9,14 @@ import 'package:secure_storage/ios_keychain/keychain_facade.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  if (!Platform.isIOS) {
+  if (!Platform.isIOS && !Platform.isMacOS) {
     debugPrint(
-      'KeychainFacade integration tests run only on iOS. Skipping.',
+      'KeychainFacade integration tests run only on iOS and macOS. Skipping.',
     );
     return;
   }
 
-  group('$KeychainFacade (iOS)', () {
+  group('$KeychainFacade (iOS / macOS) ${Platform.localeName}', () {
     late KeychainFacade facade;
     const alias = 'integration_test_keychain_facade_item';
     final data = Uint8List.fromList(
@@ -29,8 +29,9 @@ void main() {
 
     tearDown(() => facade.secItemDelete(alias));
 
-    testWidgets('contains returns false when alias does not exist',
-        (tester) async {
+    testWidgets('contains returns false when alias does not exist', (
+      tester,
+    ) async {
       final exists = await facade.contains(alias);
       expect(exists, isFalse);
     });
@@ -41,16 +42,18 @@ void main() {
       expect(exists, isTrue);
     });
 
-    testWidgets('secItemCopyMatching returns stored data after secItemAdd',
-        (tester) async {
+    testWidgets('secItemCopyMatching returns stored data after secItemAdd', (
+      tester,
+    ) async {
       await facade.secItemAdd(alias, data);
       final fetched = await facade.secItemCopyMatching(alias);
       expect(fetched, isNotNull);
       expect(fetched, equals(data));
     });
 
-    testWidgets('secItemCopyMatching returns null when alias does not exist',
-        (tester) async {
+    testWidgets('secItemCopyMatching returns null when alias does not exist', (
+      tester,
+    ) async {
       final fetched = await facade.secItemCopyMatching('nonexistent_alias_xyz');
       expect(fetched, isNull);
     });
@@ -65,8 +68,9 @@ void main() {
       expect(exists, isTrue);
     });
 
-    testWidgets('secItemAdd accepts every KeychainAccessibility value',
-        (tester) async {
+    testWidgets('secItemAdd accepts every KeychainAccessibility value', (
+      tester,
+    ) async {
       for (final accessibility in KeychainAccessibility.values) {
         final itemAlias = '${alias}_${accessibility.name}';
         addTearDown(() => facade.secItemDelete(itemAlias));
@@ -77,8 +81,9 @@ void main() {
       }
     });
 
-    testWidgets('secItemDelete removes item and contains returns false',
-        (tester) async {
+    testWidgets('secItemDelete removes item and contains returns false', (
+      tester,
+    ) async {
       await facade.secItemAdd(alias, data);
       expect(await facade.contains(alias), isTrue);
       await facade.secItemDelete(alias);
