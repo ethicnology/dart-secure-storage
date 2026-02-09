@@ -1,12 +1,12 @@
 import 'dart:typed_data';
 
-import 'package:secure_storage/android_keystore/encrypted_payload.dart';
-import 'package:secure_storage/android_keystore/keystore_facade.dart';
-import 'package:secure_storage/secure_storage_interface.dart';
+import 'package:oubliette/android_keystore/encrypted_payload.dart';
+import 'package:oubliette/android_keystore/keystore_facade.dart';
+import 'package:oubliette/oubliette_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AndroidSecureStorage extends SecureStorage {
-  AndroidSecureStorage({required this.options}) : super.internal();
+class AndroidOubliette extends Oubliette {
+  AndroidOubliette({required this.options}) : super.internal();
 
   final KeystoreFacade _keystore = KeystoreFacade();
   final AndroidOptions options;

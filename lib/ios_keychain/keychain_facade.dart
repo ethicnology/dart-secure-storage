@@ -14,7 +14,7 @@ enum KeychainAccessibility {
 }
 
 class KeychainFacade {
-  final MethodChannel _channel = const MethodChannel('secure_storage');
+  final MethodChannel _channel = const MethodChannel('oubliette');
 
   /// Returns whether a keychain item exists for [alias] without reading its data
   /// (SecItemCopyMatching with kSecReturnData: false).

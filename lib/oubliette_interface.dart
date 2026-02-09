@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-const String defaultPrefix = 'secure_storage';
+const String defaultPrefix = 'oubliette';
 const String defaultKeyAlias = 'default_key';
 
 class AndroidOptions {
@@ -17,8 +17,8 @@ class IosOptions {
   final String prefix;
 }
 
-abstract class SecureStorage {
-  SecureStorage.internal();
+abstract class Oubliette {
+  Oubliette.internal();
 
   Future<void> store(String key, Uint8List value);
   Future<Uint8List?> fetch(String key);

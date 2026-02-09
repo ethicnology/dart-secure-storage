@@ -1,6 +1,6 @@
-# secure_storage_example
+# oubliette_example
 
-Demonstrates how to use the secure_storage plugin.
+Demonstrates how to use the oubliette plugin.
 
 ## Getting Started
 

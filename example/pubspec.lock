@@ -175,6 +175,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.17.0"
+  oubliette:
+    dependency: "direct main"
+    description:
+      path: ".."
+      relative: true
+    source: path
+    version: "0.0.1"
   path:
     dependency: transitive
     description:
@@ -231,13 +238,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.5"
-  secure_storage:
-    dependency: "direct main"
-    description:
-      path: ".."
-      relative: true
-    source: path
-    version: "0.0.1"
   shared_preferences:
     dependency: transitive
     description:

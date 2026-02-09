@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:secure_storage/secure_storage_interface.dart';
+import 'package:oubliette/oubliette_interface.dart';
 
-extension SecureStorageStringExtension on SecureStorage {
+extension OublietteStringExtension on Oubliette {
   Future<void> storeString(String key, String value) =>
       store(key, Uint8List.fromList(utf8.encode(value)));
 

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:secure_storage/secure_storage.dart';
+import 'package:oubliette/oubliette.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,25 +14,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Secure Storage',
+      title: 'Oubliette',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      home: const _SecureStorageDemoPage(),
+      home: const _OublietteDemoPage(),
     );
   }
 }
 
-class _SecureStorageDemoPage extends StatefulWidget {
-  const _SecureStorageDemoPage();
+class _OublietteDemoPage extends StatefulWidget {
+  const _OublietteDemoPage();
 
   @override
-  State<_SecureStorageDemoPage> createState() => _SecureStorageDemoPageState();
+  State<_OublietteDemoPage> createState() => _OublietteDemoPageState();
 }
 
-class _SecureStorageDemoPageState extends State<_SecureStorageDemoPage> {
-  final SecureStorage _storage = createSecureStorage();
+class _OublietteDemoPageState extends State<_OublietteDemoPage> {
+  final Oubliette _storage = createOubliette();
   final _keyController = TextEditingController(text: 'my_secret_key');
   final _valueController = TextEditingController();
   String? _fetchedValue;
@@ -132,7 +132,7 @@ class _SecureStorageDemoPageState extends State<_SecureStorageDemoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Secure Storage'),
+        title: const Text('Oubliette'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: SingleChildScrollView(

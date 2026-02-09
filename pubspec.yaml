@@ -1,4 +1,4 @@
-name: secure_storage
+name: oubliette
 description: "A new Flutter plugin project."
 version: 0.0.1
 homepage:
@@ -38,12 +38,12 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.example.secure_storage
-        pluginClass: SecureStoragePlugin
+        package: com.example.oubliette
+        pluginClass: OubliettePlugin
       ios:
-        pluginClass: SecureStoragePlugin
+        pluginClass: OubliettePlugin
       macos:
-        pluginClass: SecureStoragePlugin
+        pluginClass: OubliettePlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

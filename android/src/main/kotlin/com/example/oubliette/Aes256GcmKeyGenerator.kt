@@ -1,4 +1,4 @@
-package com.example.secure_storage
+package com.example.oubliette
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties

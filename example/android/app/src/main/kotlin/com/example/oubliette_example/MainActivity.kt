@@ -1,4 +1,4 @@
-package com.example.secure_storage_example
+package com.example.oubliette_example
 
 import io.flutter.embedding.android.FlutterActivity
 

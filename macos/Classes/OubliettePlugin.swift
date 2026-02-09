@@ -1,10 +1,10 @@
 import FlutterMacOS
 import Security
 
-public class SecureStoragePlugin: NSObject, FlutterPlugin {
+public class OubliettePlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "secure_storage", binaryMessenger: registrar.messenger)
-    let instance = SecureStoragePlugin()
+    let channel = FlutterMethodChannel(name: "oubliette", binaryMessenger: registrar.messenger)
+    let instance = OubliettePlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
   }
 

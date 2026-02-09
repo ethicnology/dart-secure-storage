@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
-import 'package:secure_storage/ios_keychain/keychain_facade.dart';
-import 'package:secure_storage/secure_storage_interface.dart';
+import 'package:oubliette/ios_keychain/keychain_facade.dart';
+import 'package:oubliette/oubliette_interface.dart';
 
-class IosSecureStorage extends SecureStorage {
-  IosSecureStorage({IosOptions? options})
+class IosOubliette extends Oubliette {
+  IosOubliette({IosOptions? options})
       : options = options ?? const IosOptions(),
         super.internal();
 

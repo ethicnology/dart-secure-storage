@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:secure_storage/android_keystore/keystore_facade.dart';
+import 'package:oubliette/android_keystore/keystore_facade.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

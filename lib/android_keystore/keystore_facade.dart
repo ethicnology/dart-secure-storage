@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 
-import 'package:secure_storage/android_keystore/encrypted_payload.dart';
+import 'package:oubliette/android_keystore/encrypted_payload.dart';
 
 class KeystoreFacade {
-  final MethodChannel _channel = const MethodChannel('secure_storage');
+  final MethodChannel _channel = const MethodChannel('oubliette');
 
   /// Returns whether the Android Keystore contains an entry for [alias] (KeyStore.containsAlias).
   Future<bool> containsAlias(String alias) async {

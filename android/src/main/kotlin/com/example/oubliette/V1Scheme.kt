@@ -1,4 +1,4 @@
-package com.example.secure_storage
+package com.example.oubliette
 
 import java.nio.charset.StandardCharsets
 import java.security.KeyStore

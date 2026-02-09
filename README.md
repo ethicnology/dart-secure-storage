@@ -1,6 +1,6 @@
-# secure_storage
+# oubliette
 
-Flutter plugin to store sensitive data (bytes) on iOS, macOS, and Android using each platform’s secure backing store.
+Flutter plugin to store sensitive data (bytes) on iOS, macOS, and Android using each platform's secure backing store.
 
 - **iOS:** Values are stored in the [Keychain](https://developer.apple.com/documentation/security/keychain_services) (generic password items). Data is protected by the system; no extra encryption layer in the plugin.
 - **macOS:** Values are stored in the system Keychain (traditional file-based keychain). No entitlements or code signing are required; the plugin works out of the box. Data is encrypted at rest and protected by the system.
@@ -19,15 +19,15 @@ Values are **bytes** (`Uint8List`). Keys are strings.
 | `storeString(key, value)` | Convenience: store a UTF-8 string (same as `store(key, utf8.encode(value))`). |
 | `fetchString(key)` | Convenience: fetch and decode as UTF-8 string, or `null`. |
 
-Stored keys are namespaced with a `prefix` (default: `secure_storage`), so the stored key is `prefix + key`. The prefix is per platform: set `IosOptions(prefix: '...')` for iOS/macOS and `AndroidOptions(prefix: '...', keyAlias: '...')` for Android. On Android, a single Keystore key is used for all entries (default alias: `default_key`).
+Stored keys are namespaced with a `prefix` (default: `oubliette`), so the stored key is `prefix + key`. The prefix is per platform: set `IosOptions(prefix: '...')` for iOS/macOS and `AndroidOptions(prefix: '...', keyAlias: '...')` for Android. On Android, a single Keystore key is used for all entries (default alias: `default_key`).
 
 ## Usage
 
 ```dart
 import 'dart:convert';
-import 'package:secure_storage/secure_storage.dart';
+import 'package:oubliette/oubliette.dart';
 
-final storage = createSecureStorage();
+final storage = createOubliette();
 
 // Bytes (e.g. tokens, keys, binary)
 await storage.store('api_token', Uint8List.fromList(utf8.encode('eyJ...')));
@@ -46,8 +46,8 @@ Add the dependency:
 
 ```yaml
 dependencies:
-  secure_storage:
-    path: ../path/to/secure_storage  # or use git/version
+  oubliette:
+    path: ../path/to/oubliette  # or use git/version
 ```
 
 - **Android:** Requires `minSdkVersion` 29 or higher (Keystore API used by the plugin).
@@ -66,7 +66,7 @@ cd example && flutter run
 
 ## Integration tests
 
-Integration tests (including the end-user API: `createSecureStorage`, `store`/`fetch`, `storeString`/`fetchString`, `trash`, `exists`) live in `example/integration_test/`. Run them from the example app on a device or simulator:
+Integration tests (including the end-user API: `createOubliette`, `store`/`fetch`, `storeString`/`fetchString`, `trash`, `exists`) live in `example/integration_test/`. Run them from the example app on a device or simulator:
 
 ```bash
 cd example && flutter test integration_test/

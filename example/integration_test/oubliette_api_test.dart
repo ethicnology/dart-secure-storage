@@ -3,16 +3,16 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:secure_storage/secure_storage.dart';
+import 'package:oubliette/oubliette.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  group('SecureStorage (end-user API)', () {
-    late SecureStorage storage;
+  group('Oubliette (end-user API)', () {
+    late Oubliette storage;
 
     setUp(() {
-      storage = createSecureStorage();
+      storage = createOubliette();
     });
 
     testWidgets('store/fetch/trash bytes round-trip', (WidgetTester tester) async {

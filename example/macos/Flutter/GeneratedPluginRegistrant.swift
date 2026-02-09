@@ -5,10 +5,10 @@
 import FlutterMacOS
 import Foundation
 
-import secure_storage
+import oubliette
 import shared_preferences_foundation
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
-  SecureStoragePlugin.register(with: registry.registrar(forPlugin: "SecureStoragePlugin"))
+  OubliettePlugin.register(with: registry.registrar(forPlugin: "OubliettePlugin"))
   SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))
 }

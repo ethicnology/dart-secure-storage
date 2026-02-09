@@ -1,4 +1,4 @@
-package com.example.secure_storage
+package com.example.oubliette
 
 object SchemeRegistry {
   const val CURRENT_VERSION = 1

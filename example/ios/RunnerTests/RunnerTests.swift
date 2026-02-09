@@ -2,7 +2,7 @@ import Flutter
 import UIKit
 import XCTest
 
-@testable import secure_storage
+@testable import oubliette
 
 class RunnerTests: XCTestCase {
 }

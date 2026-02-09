@@ -1,4 +1,4 @@
-package com.example.secure_storage
+package com.example.oubliette
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -10,16 +10,16 @@ import io.flutter.plugin.common.MethodChannel.Result
 import java.security.KeyStore
 import javax.crypto.SecretKey
 
-class SecureStoragePlugin : FlutterPlugin, MethodCallHandler {
+class OubliettePlugin : FlutterPlugin, MethodCallHandler {
 
   private lateinit var channel: MethodChannel
   private lateinit var appContext: Context
-  private val tag = "SecureStoragePlugin"
+  private val tag = "OubliettePlugin"
 
   private val keyStoreType = "AndroidKeyStore"
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "secure_storage")
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "oubliette")
     appContext = flutterPluginBinding.applicationContext
     channel.setMethodCallHandler(this)
   }

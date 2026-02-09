@@ -3,7 +3,7 @@ import FlutterMacOS
 import XCTest
 
 
-@testable import secure_storage
+@testable import oubliette
 
 // This demonstrates a simple unit test of the Swift portion of this plugin's implementation.
 //
@@ -12,7 +12,7 @@ import XCTest
 class RunnerTests: XCTestCase {
 
   func testGetPlatformVersion() {
-    let plugin = SecureStoragePlugin()
+    let plugin = OubliettePlugin()
 
     let call = FlutterMethodCall(methodName: "getPlatformVersion", arguments: [])
 

@@ -1,4 +1,4 @@
-package com.example.secure_storage
+package com.example.oubliette
 
 interface EncryptionScheme {
   val version: Int
