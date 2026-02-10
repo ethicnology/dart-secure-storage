@@ -2,15 +2,17 @@ package com.example.keystore
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import android.util.Log
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
 
 object Aes256GcmKeyGenerator {
   private const val keyStoreType = "AndroidKeyStore"
-  private const val tag = "Aes256GcmKeyGenerator"
 
-  fun generateKey(alias: String, unlockedDeviceRequired: Boolean) {
+  fun generateKey(
+    alias: String,
+    unlockedDeviceRequired: Boolean,
+    strongBox: Boolean
+  ) {
     val keyStore = KeyStore.getInstance(keyStoreType)
     keyStore.load(null)
     if (keyStore.containsAlias(alias)) return
@@ -27,10 +29,8 @@ object Aes256GcmKeyGenerator {
       .setKeySize(256)
       .setRandomizedEncryptionRequired(true)
       .setUnlockedDeviceRequired(unlockedDeviceRequired)
-    try {
+    if (strongBox) {
       specBuilder.setIsStrongBoxBacked(true)
-    } catch (e: Exception) {
-      Log.i(tag, "StrongBox not available", e)
     }
     keyGenerator.init(specBuilder.build())
     keyGenerator.generateKey()

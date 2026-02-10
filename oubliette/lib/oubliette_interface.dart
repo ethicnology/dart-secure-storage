@@ -8,6 +8,7 @@ class AndroidOptions {
     this.prefix = defaultPrefix,
     this.keyAlias = defaultKeyAlias,
     this.unlockedDeviceRequired = true,
+    this.strongBox = true,
   });
 
   /// Prefix prepended to every storage key.
@@ -20,6 +21,11 @@ class AndroidOptions {
   /// device is unlocked. Maps to `setUnlockedDeviceRequired` on the
   /// `KeyGenParameterSpec`.
   final bool unlockedDeviceRequired;
+
+  /// When `true`, prefers StrongBox-backed key storage if the device
+  /// supports it (`PackageManager.FEATURE_STRONGBOX_KEYSTORE`).
+  /// Falls back silently to TEE if StrongBox is unavailable.
+  final bool strongBox;
 
 }
 

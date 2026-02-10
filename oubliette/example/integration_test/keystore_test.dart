@@ -40,7 +40,7 @@ void main() {
     testWidgets('generateKey creates key and containsAlias returns true', (
       tester,
     ) async {
-      await facade.generateKey(alias: alias, unlockedDeviceRequired: false);
+      await facade.generateKey(alias: alias, unlockedDeviceRequired: false, strongBox: true);
       final exists = await facade.containsAlias(alias);
       expect(exists, isTrue);
     });
@@ -48,7 +48,7 @@ void main() {
     testWidgets('encrypt returns nonce, ciphertext, version, aad, alias', (
       tester,
     ) async {
-      await facade.generateKey(alias: alias, unlockedDeviceRequired: false);
+      await facade.generateKey(alias: alias, unlockedDeviceRequired: false, strongBox: true);
       final payload = await facade.encrypt(
         alias: alias,
         plaintext: plaintext,
@@ -63,7 +63,7 @@ void main() {
 
     testWidgets('decrypt recovers plaintext using payload version, aad, alias',
         (tester) async {
-      await facade.generateKey(alias: alias, unlockedDeviceRequired: false);
+      await facade.generateKey(alias: alias, unlockedDeviceRequired: false, strongBox: true);
       final encrypted = await facade.encrypt(
         alias: alias,
         plaintext: plaintext,
@@ -87,7 +87,7 @@ void main() {
     testWidgets('deleteEntry removes key and containsAlias returns false', (
       tester,
     ) async {
-      await facade.generateKey(alias: alias, unlockedDeviceRequired: false);
+      await facade.generateKey(alias: alias, unlockedDeviceRequired: false, strongBox: true);
       expect(await facade.containsAlias(alias), isTrue);
       await facade.deleteEntry(alias);
       final exists = await facade.containsAlias(alias);

@@ -63,12 +63,15 @@ class KeystorePlugin : FlutterPlugin, MethodCallHandler {
           result.error("bad_args", "Missing unlockedDeviceRequired.", null)
           return
         }
+      val wantsStrongBox = call.argument<Boolean>("strongBox") ?: true
+      val useStrongBox = wantsStrongBox &&
+          appContext.packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_STRONGBOX_KEYSTORE)
       val scheme = SchemeRegistry.schemeFor(version)
       if (scheme == null) {
         result.error("generate_key_failed", "Unsupported version.", null)
         return
       }
-      scheme.generateKey(alias, unlockedDeviceRequired)
+      scheme.generateKey(alias, unlockedDeviceRequired, useStrongBox)
       result.success(null)
     } catch (e: Exception) {
       result.error("generate_key_failed", e.message ?: e.toString(), null)

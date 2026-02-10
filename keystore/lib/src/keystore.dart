@@ -15,10 +15,12 @@ class Keystore {
   Future<void> generateKey({
     required String alias,
     required bool unlockedDeviceRequired,
+    required bool strongBox,
   }) async {
     await _channel.invokeMethod<void>('generateKey', {
       'alias': alias,
       'unlockedDeviceRequired': unlockedDeviceRequired,
+      'strongBox': strongBox,
     });
   }
 

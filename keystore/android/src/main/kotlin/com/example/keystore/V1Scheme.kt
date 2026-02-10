@@ -15,8 +15,8 @@ class V1Scheme(
 
   override val version: Int get() = 1
 
-  override fun generateKey(alias: String, unlockedDeviceRequired: Boolean) {
-    Aes256GcmKeyGenerator.generateKey(alias, unlockedDeviceRequired)
+  override fun generateKey(alias: String, unlockedDeviceRequired: Boolean, strongBox: Boolean) {
+    Aes256GcmKeyGenerator.generateKey(alias, unlockedDeviceRequired, strongBox)
   }
 
   override fun encrypt(
