@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: DefaultTabController(
-        length: Platform.isAndroid ? 2 : 1,
+        length: (Platform.isAndroid || Platform.isIOS) ? 2 : 1,
         child: const _OublietteDemoPage(),
       ),
     );
@@ -34,7 +34,7 @@ class _OublietteDemoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final tabs = <Widget>[const Tab(text: 'Storage')];
     final views = <Widget>[const _StorageTab()];
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       tabs.add(const Tab(text: 'Biometric'));
       views.add(const _BiometricTab());
     }
@@ -277,6 +277,16 @@ class _BiometricTabState extends State<_BiometricTab> {
           promptSubtitle: 'Authenticate to access your secret',
         ),
       ),
+      iosOptions: const DarwinOptions.iOS(
+        authentication: DarwinAuthentication(
+          promptReason: 'Authenticate to access your secret',
+        ),
+      ),
+      macosOptions: const DarwinOptions.macOS(
+        authentication: DarwinAuthentication(
+          promptReason: 'Authenticate to access your secret',
+        ),
+      ),
     );
   }
 
@@ -368,8 +378,10 @@ class _BiometricTabState extends State<_BiometricTab> {
                   ]),
                   const SizedBox(height: 8),
                   Text(
-                    'Every save and load will trigger a biometric prompt (fingerprint, face, or device PIN). '
-                    'The encryption key is hardware-backed and requires user authentication for each use.',
+                    Platform.isAndroid
+                        ? 'Every save and load will trigger a biometric prompt (fingerprint, face, or device PIN). '
+                          'The encryption key is hardware-backed and requires user authentication for each use.'
+                        : 'Every save and load is protected by Touch ID, Face ID, or password via Keychain access control.',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:oubliette/oubliette_interface.dart';
+import 'package:oubliette/oubliette.dart';
 
 extension OublietteStringExtension on Oubliette {
   Future<void> storeString(String key, String value) =>

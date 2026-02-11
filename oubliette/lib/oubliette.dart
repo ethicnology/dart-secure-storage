@@ -1,12 +1,23 @@
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:oubliette/oubliette_android.dart'
-    show AndroidOubliette;
-import 'package:oubliette/oubliette_interface.dart';
-import 'package:oubliette/oubliette_ios.dart' show IosOubliette;
+import 'package:oubliette/android_oubliette.dart' show AndroidOubliette;
+import 'package:oubliette/android_options.dart';
+import 'package:oubliette/darwin_oubliette.dart' show DarwinOubliette;
+import 'package:oubliette/darwin_options.dart';
 
-export 'oubliette_interface.dart';
+export 'android_options.dart';
+export 'darwin_options.dart';
 export 'oubliette_string_extension.dart';
+
+abstract class Oubliette {
+  Oubliette.internal();
+
+  Future<void> store(String key, Uint8List value);
+  Future<Uint8List?> fetch(String key);
+  Future<void> trash(String key);
+  Future<bool> exists(String key);
+}
 
 enum OubliettePlatform { ios, macos, android }
 
@@ -25,14 +36,14 @@ OubliettePlatform get _currentPlatform {
 
 Oubliette createOubliette({
   AndroidOptions? androidOptions,
-  IosOptions? iosOptions,
-  MacosOptions? macosOptions,
+  DarwinOptions? iosOptions,
+  DarwinOptions? macosOptions,
 }) {
   switch (_currentPlatform) {
     case OubliettePlatform.ios:
-      return IosOubliette(options: iosOptions ?? const IosOptions());
+      return DarwinOubliette(options: iosOptions ?? const DarwinOptions.iOS());
     case OubliettePlatform.macos:
-      return IosOubliette(options: macosOptions ?? const MacosOptions());
+      return DarwinOubliette(options: macosOptions ?? const DarwinOptions.macOS());
     case OubliettePlatform.android:
       return AndroidOubliette(
         options: androidOptions ?? const AndroidOptions(),

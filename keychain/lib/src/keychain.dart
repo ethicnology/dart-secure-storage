@@ -26,10 +26,23 @@ class KeychainConfig {
   /// 10.15+, which uses the iOS-style data protection keychain instead of
   /// the legacy file-based keychain. Requires the `keychain-access-groups`
   /// entitlement and a valid code-signing identity. No effect on iOS.
+  ///
+  /// [authenticationRequired] when `true`, the item is stored with a
+  /// `SecAccessControl` that requires user presence (biometry or passcode).
+  ///
+  /// [biometryCurrentSetOnly] when `true` (and [authenticationRequired] is
+  /// `true`), uses `.biometryCurrentSet` flag which invalidates items when
+  /// biometric enrollment changes.
+  ///
+  /// [authenticationPrompt] reason string shown in the system authentication
+  /// dialog when reading an authentication-protected item.
   const KeychainConfig({
     this.service,
     this.accessibility = KeychainAccessibility.whenUnlockedThisDeviceOnly,
     this.useDataProtection = false,
+    this.authenticationRequired = false,
+    this.biometryCurrentSetOnly = false,
+    this.authenticationPrompt,
   });
 
   /// `kSecAttrService` — namespaces keychain items by service identifier.
@@ -41,10 +54,25 @@ class KeychainConfig {
   /// macOS only — opts into the data protection keychain.
   final bool useDataProtection;
 
+  /// When `true`, items are protected by `SecAccessControl` with user
+  /// presence (biometry / passcode).
+  final bool authenticationRequired;
+
+  /// When `true` and [authenticationRequired] is `true`, uses
+  /// `.biometryCurrentSet` instead of `.userPresence`.
+  final bool biometryCurrentSetOnly;
+
+  /// Reason displayed in the system authentication dialog on read.
+  final String? authenticationPrompt;
+
   Map<String, dynamic> toMap() => {
         if (service != null) 'service': service,
         'accessibility': accessibility.value,
         if (useDataProtection) 'useDataProtection': true,
+        if (authenticationRequired) 'authenticationRequired': true,
+        if (biometryCurrentSetOnly) 'biometryCurrentSetOnly': true,
+        if (authenticationPrompt != null)
+          'authenticationPrompt': authenticationPrompt,
       };
 }
 

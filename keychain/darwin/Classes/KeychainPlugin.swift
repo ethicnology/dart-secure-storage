@@ -10,6 +10,9 @@ private struct KeychainParams {
   let service: String?
   let accessibility: CFString
   let useDataProtection: Bool
+  let authenticationRequired: Bool
+  let biometryCurrentSetOnly: Bool
+  let authenticationPrompt: String?
 
   static func from(_ args: [String: Any]) -> KeychainParams? {
     guard let alias = args["alias"] as? String else { return nil }
@@ -17,10 +20,15 @@ private struct KeychainParams {
       alias: alias,
       service: args["service"] as? String,
       accessibility: SecAccessibility.fromDart(args["accessibility"] as? String),
-      useDataProtection: args["useDataProtection"] as? Bool ?? false
+      useDataProtection: args["useDataProtection"] as? Bool ?? false,
+      authenticationRequired: args["authenticationRequired"] as? Bool ?? false,
+      biometryCurrentSetOnly: args["biometryCurrentSetOnly"] as? Bool ?? false,
+      authenticationPrompt: args["authenticationPrompt"] as? String
     )
   }
 }
+
+private let serialQueue = DispatchQueue(label: "com.oubliette.keychain", qos: .userInitiated)
 
 public class KeychainPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -55,12 +63,16 @@ public class KeychainPlugin: NSObject, FlutterPlugin {
       result(FlutterError(code: "bad_args", message: "Missing alias or data.", details: nil))
       return
     }
-    let status = secItemAdd(params: params, data: data.data)
-    guard status == errSecSuccess else {
-      result(FlutterError(code: "sec_item_add_failed", message: String(status), details: nil))
-      return
+    serialQueue.async {
+      let status = secItemAdd(params: params, data: data.data)
+      DispatchQueue.main.async {
+        guard status == errSecSuccess else {
+          result(FlutterError(code: "sec_item_add_failed", message: String(status), details: nil))
+          return
+        }
+        result(nil)
+      }
     }
-    result(nil)
   }
 
   private func handleKeychainContains(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -78,10 +90,33 @@ public class KeychainPlugin: NSObject, FlutterPlugin {
       result(FlutterError(code: "bad_args", message: "Missing alias.", details: nil))
       return
     }
-    if let keyData = secItemCopyMatching(params: params) {
-      result(FlutterStandardTypedData(bytes: keyData))
-    } else {
-      result(nil)
+    serialQueue.async {
+      var query = keychainReadQuery(params: params, returnData: true)
+      if let prompt = params.authenticationPrompt {
+        query[kSecUseOperationPrompt as String] = prompt
+      }
+      var item: CFTypeRef?
+      let status = Security.SecItemCopyMatching(query as CFDictionary, &item)
+      DispatchQueue.main.async {
+        switch status {
+        case errSecSuccess:
+          if let data = item as? Data {
+            result(FlutterStandardTypedData(bytes: data))
+          } else {
+            result(nil)
+          }
+        case errSecItemNotFound:
+          result(nil)
+        case errSecUserCanceled:
+          result(FlutterError(code: "auth_cancelled", message: "User cancelled authentication.", details: nil))
+        case errSecAuthFailed:
+          result(FlutterError(code: "auth_failed", message: "Authentication failed.", details: nil))
+        case errSecInteractionNotAllowed:
+          result(FlutterError(code: "interaction_not_allowed", message: "Keychain interaction not allowed (device locked?).", details: nil))
+        default:
+          result(FlutterError(code: "sec_item_copy_failed", message: String(status), details: nil))
+        }
+      }
     }
   }
 
@@ -123,7 +158,7 @@ private func keychainQuery(params: KeychainParams) -> [String: Any] {
     query[kSecAttrService as String] = service
   }
   #if os(macOS)
-  if params.useDataProtection, #available(macOS 10.15, *) {
+  if (params.useDataProtection || params.authenticationRequired), #available(macOS 10.15, *) {
     query[kSecUseDataProtectionKeychain as String] = true
   }
   #endif
@@ -137,18 +172,28 @@ private func keychainReadQuery(params: KeychainParams, returnData: Bool) -> [Str
   return query
 }
 
-private func secItemCopyMatching(params: KeychainParams) -> Data? {
-  let query = keychainReadQuery(params: params, returnData: true)
-  var item: CFTypeRef?
-  let status = Security.SecItemCopyMatching(query as CFDictionary, &item)
-  guard status == errSecSuccess else { return nil }
-  return item as? Data
-}
-
 private func secItemExists(params: KeychainParams) -> Bool {
   let query = keychainReadQuery(params: params, returnData: false)
   let status = Security.SecItemCopyMatching(query as CFDictionary, nil)
   return status == errSecSuccess
+}
+
+private func createAccessControl(params: KeychainParams) -> SecAccessControl? {
+  let flags: SecAccessControlCreateFlags = params.biometryCurrentSetOnly
+    ? .biometryCurrentSet
+    : .userPresence
+  var error: Unmanaged<CFError>?
+  let accessControl = SecAccessControlCreateWithFlags(
+    nil,
+    params.accessibility,
+    flags,
+    &error
+  )
+  if let error = error?.takeRetainedValue() {
+    NSLog("KeychainPlugin: Error creating access control: \(error.localizedDescription)")
+    return nil
+  }
+  return accessControl
 }
 
 private func secItemAdd(params: KeychainParams, data: Data) -> OSStatus {
@@ -157,7 +202,11 @@ private func secItemAdd(params: KeychainParams, data: Data) -> OSStatus {
   if secItemExists(params: params) {
     return Security.SecItemUpdate(matchQuery as CFDictionary, attributes as CFDictionary)
   }
-  matchQuery[kSecAttrAccessible as String] = params.accessibility
+  if params.authenticationRequired, let accessControl = createAccessControl(params: params) {
+    matchQuery[kSecAttrAccessControl as String] = accessControl
+  } else {
+    matchQuery[kSecAttrAccessible as String] = params.accessibility
+  }
   matchQuery[kSecValueData as String] = data
   return Security.SecItemAdd(matchQuery as CFDictionary, nil)
 }

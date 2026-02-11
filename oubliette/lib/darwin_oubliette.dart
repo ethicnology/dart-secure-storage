@@ -1,26 +1,18 @@
 import 'dart:typed_data';
 
 import 'package:keychain/keychain.dart';
-import 'package:oubliette/oubliette_interface.dart';
+import 'package:oubliette/oubliette.dart';
 
-class IosOubliette extends Oubliette {
-  IosOubliette({KeychainOptions? options})
-      : options = options ?? const IosOptions(),
+class DarwinOubliette extends Oubliette {
+  DarwinOubliette({DarwinOptions? options})
+      : options = options ?? const DarwinOptions.iOS(),
         _keychain = Keychain(
-          config: _configFrom(options ?? const IosOptions()),
+          config: (options ?? const DarwinOptions.iOS()).toConfig(),
         ),
         super.internal();
 
-  final KeychainOptions options;
+  final DarwinOptions options;
   final Keychain _keychain;
-
-  static KeychainConfig _configFrom(KeychainOptions options) => KeychainConfig(
-        service: options.service,
-        accessibility: options.unlockedDeviceRequired
-            ? KeychainAccessibility.whenUnlockedThisDeviceOnly
-            : KeychainAccessibility.afterFirstUnlockThisDeviceOnly,
-        useDataProtection: options.useDataProtection,
-      );
 
   String _storedKey(String key) => options.prefix + key;
 

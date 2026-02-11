@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:keystore/keystore.dart';
-import 'package:oubliette/oubliette_interface.dart';
+import 'package:oubliette/oubliette.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AndroidOubliette extends Oubliette {
