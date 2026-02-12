@@ -158,7 +158,11 @@ private func keychainQuery(params: KeychainParams) -> [String: Any] {
     query[kSecAttrService as String] = service
   }
   #if os(macOS)
-  if (params.useDataProtection || params.authenticationRequired), #available(macOS 10.15, *) {
+  // Data Protection keychain (iOS-style) — requires code signing + keychain-access-groups entitlement.
+  // When false, items go into the legacy file-based keychain which works unsigned.
+  // authenticationRequired + useDataProtection=false → legacy keychain with macOS password prompt.
+  // authenticationRequired + useDataProtection=true  → Data Protection keychain with Touch ID / Face ID.
+  if params.useDataProtection, #available(macOS 10.15, *) {
     query[kSecUseDataProtectionKeychain as String] = true
   }
   #endif

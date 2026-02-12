@@ -13,7 +13,8 @@ object Aes256GcmKeyGenerator {
     alias: String,
     unlockedDeviceRequired: Boolean,
     strongBox: Boolean,
-    userAuthenticationRequired: Boolean
+    userAuthenticationRequired: Boolean,
+    invalidatedByBiometricEnrollment: Boolean
   ) {
     val keyStore = KeyStore.getInstance(keyStoreType)
     keyStore.load(null)
@@ -36,7 +37,7 @@ object Aes256GcmKeyGenerator {
     }
     if (userAuthenticationRequired && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
       specBuilder.setUserAuthenticationRequired(true)
-      specBuilder.setInvalidatedByBiometricEnrollment(true)
+      specBuilder.setInvalidatedByBiometricEnrollment(invalidatedByBiometricEnrollment)
       specBuilder.setUserAuthenticationParameters(
         0,
         KeyProperties.AUTH_DEVICE_CREDENTIAL or KeyProperties.AUTH_BIOMETRIC_STRONG

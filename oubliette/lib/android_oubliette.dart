@@ -5,21 +5,22 @@ import 'package:oubliette/oubliette.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AndroidOubliette extends Oubliette {
-  AndroidOubliette({required this.options}) : super.internal();
+  AndroidOubliette({required this.access}) : super.internal();
 
   final Keystore _keystore = Keystore();
-  final AndroidOptions options;
+  final AndroidSecretAccess access;
 
-  String _storedKey(String key) => options.prefix + key;
+  String _storedKey(String key) => access.prefix + key;
 
   Future<void> _ensureKey() async {
-    final exists = await _keystore.containsAlias(options.keyAlias);
+    final exists = await _keystore.containsAlias(access.keyAlias);
     if (!exists) {
       await _keystore.generateKey(
-        alias: options.keyAlias,
-        unlockedDeviceRequired: options.unlockedDeviceRequired,
-        strongBox: options.strongBox,
-        userAuthenticationRequired: options.authentication != null,
+        alias: access.keyAlias,
+        unlockedDeviceRequired: access.unlockedDeviceRequired,
+        strongBox: access.strongBox,
+        userAuthenticationRequired: access.userAuthenticationRequired,
+        invalidatedByBiometricEnrollment: access.invalidatedByBiometricEnrollment,
       );
     }
   }
@@ -29,11 +30,11 @@ class AndroidOubliette extends Oubliette {
     final storedKey = _storedKey(key);
     await _ensureKey();
     final ep = await _keystore.encrypt(
-      alias: options.keyAlias,
+      alias: access.keyAlias,
       plaintext: value,
       aad: storedKey,
-      promptTitle: options.authentication?.promptTitle,
-      promptSubtitle: options.authentication?.promptSubtitle,
+      promptTitle: access.promptTitle,
+      promptSubtitle: access.promptSubtitle,
     );
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(storedKey, ep.toJson());
@@ -52,8 +53,8 @@ class AndroidOubliette extends Oubliette {
       ciphertext: ep.ciphertext,
       nonce: ep.nonce,
       aad: ep.aad,
-      promptTitle: options.authentication?.promptTitle,
-      promptSubtitle: options.authentication?.promptSubtitle,
+      promptTitle: access.promptTitle,
+      promptSubtitle: access.promptSubtitle,
     );
   }
 

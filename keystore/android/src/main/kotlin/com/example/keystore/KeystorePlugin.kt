@@ -93,12 +93,13 @@ class KeystorePlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       val useStrongBox = wantsStrongBox &&
           appContext.packageManager.hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE)
       val userAuthenticationRequired = call.argument<Boolean>("userAuthenticationRequired") ?: false
+      val invalidatedByBiometricEnrollment = call.argument<Boolean>("invalidatedByBiometricEnrollment") ?: true
       val scheme = SchemeRegistry.schemeFor(version)
       if (scheme == null) {
         result.error("generate_key_failed", "Unsupported version.", null)
         return
       }
-      scheme.generateKey(alias, unlockedDeviceRequired, useStrongBox, userAuthenticationRequired)
+      scheme.generateKey(alias, unlockedDeviceRequired, useStrongBox, userAuthenticationRequired, invalidatedByBiometricEnrollment)
       result.success(null)
     } catch (e: Exception) {
       result.error("generate_key_failed", e.message ?: e.toString(), null)

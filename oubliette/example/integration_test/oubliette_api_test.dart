@@ -12,7 +12,10 @@ void main() {
     late Oubliette storage;
 
     setUp(() {
-      storage = createOubliette();
+      storage = Oubliette(
+        android: const AndroidSecretAccess.onlyUnlocked(),
+        darwin: const DarwinSecretAccess.onlyUnlocked(),
+      );
     });
 
     testWidgets('store/fetch/trash bytes round-trip', (WidgetTester tester) async {

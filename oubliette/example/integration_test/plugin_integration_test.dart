@@ -6,7 +6,10 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('store/fetch/trash round-trip', (WidgetTester tester) async {
-    final plugin = createOubliette();
+    final plugin = Oubliette(
+      android: const AndroidSecretAccess.onlyUnlocked(),
+      darwin: const DarwinSecretAccess.onlyUnlocked(),
+    );
     const key = 'plugin_test_key';
     const value = 'hello plugin';
     await plugin.storeString(key, value);

@@ -3,7 +3,7 @@ package com.example.keystore
 interface EncryptionScheme {
   val version: Int
 
-  fun generateKey(alias: String, unlockedDeviceRequired: Boolean, strongBox: Boolean, userAuthenticationRequired: Boolean)
+  fun generateKey(alias: String, unlockedDeviceRequired: Boolean, strongBox: Boolean, userAuthenticationRequired: Boolean, invalidatedByBiometricEnrollment: Boolean)
 
   fun encrypt(
     alias: String,

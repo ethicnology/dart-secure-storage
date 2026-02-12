@@ -17,12 +17,14 @@ class Keystore {
     required bool unlockedDeviceRequired,
     required bool strongBox,
     bool userAuthenticationRequired = false,
+    bool invalidatedByBiometricEnrollment = true,
   }) async {
     await _channel.invokeMethod<void>('generateKey', {
       'alias': alias,
       'unlockedDeviceRequired': unlockedDeviceRequired,
       'strongBox': strongBox,
       'userAuthenticationRequired': userAuthenticationRequired,
+      'invalidatedByBiometricEnrollment': invalidatedByBiometricEnrollment,
     });
   }
 

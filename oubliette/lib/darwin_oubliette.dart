@@ -4,17 +4,14 @@ import 'package:keychain/keychain.dart';
 import 'package:oubliette/oubliette.dart';
 
 class DarwinOubliette extends Oubliette {
-  DarwinOubliette({DarwinOptions? options})
-      : options = options ?? const DarwinOptions.iOS(),
-        _keychain = Keychain(
-          config: (options ?? const DarwinOptions.iOS()).toConfig(),
-        ),
+  DarwinOubliette({required this.access})
+      : _keychain = Keychain(config: access.toConfig()),
         super.internal();
 
-  final DarwinOptions options;
+  final DarwinSecretAccess access;
   final Keychain _keychain;
 
-  String _storedKey(String key) => options.prefix + key;
+  String _storedKey(String key) => access.prefix + key;
 
   @override
   Future<void> store(String key, Uint8List value) async {
