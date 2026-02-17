@@ -1,4 +1,4 @@
-package com.example.keystore
+package com.oubliette.keystore
 
 import java.nio.charset.StandardCharsets
 import java.security.KeyStore
@@ -20,20 +20,17 @@ class V1Scheme(
 
   override val version: Int get() = 1
 
+  private val timeoutExecutor = Executors.newSingleThreadExecutor()
+
   private fun initCipherWithTimeout(block: () -> Unit) {
-    val executor = Executors.newSingleThreadExecutor()
+    val future = timeoutExecutor.submit(block)
     try {
-      val future = executor.submit(block)
-      try {
-        future.get(cipherInitTimeoutSeconds, TimeUnit.SECONDS)
-      } catch (e: TimeoutException) {
-        future.cancel(true)
-        throw ProviderException("timed out after ${cipherInitTimeoutSeconds}s — hardware backend may be busy")
-      } catch (e: java.util.concurrent.ExecutionException) {
-        throw e.cause ?: e
-      }
-    } finally {
-      executor.shutdown()
+      future.get(cipherInitTimeoutSeconds, TimeUnit.SECONDS)
+    } catch (e: TimeoutException) {
+      future.cancel(true)
+      throw ProviderException("timed out after ${cipherInitTimeoutSeconds}s — hardware backend may be busy")
+    } catch (e: java.util.concurrent.ExecutionException) {
+      throw e.cause ?: e
     }
   }
 
@@ -60,7 +57,7 @@ class V1Scheme(
     return decryptWithCipher(cipher, ciphertext, aad)
   }
 
-  fun initEncryptCipher(alias: String): Cipher {
+  override fun initEncryptCipher(alias: String): Cipher {
     val key = getKey(alias)
       ?: throw IllegalArgumentException("Key not found for alias.")
     val cipher = Cipher.getInstance(aesMode)
@@ -68,7 +65,7 @@ class V1Scheme(
     return cipher
   }
 
-  fun initDecryptCipher(alias: String, nonce: ByteArray): Cipher {
+  override fun initDecryptCipher(alias: String, nonce: ByteArray): Cipher {
     if (nonce.size != ivSizeBytes) {
       throw IllegalArgumentException("Invalid nonce size.")
     }
@@ -79,7 +76,7 @@ class V1Scheme(
     return cipher
   }
 
-  fun encryptWithCipher(cipher: Cipher, plaintext: ByteArray, aad: String): EncryptResult {
+  override fun encryptWithCipher(cipher: Cipher, plaintext: ByteArray, aad: String): EncryptResult {
     cipher.updateAAD(aad.toByteArray(StandardCharsets.UTF_8))
     val ciphertext = cipher.doFinal(plaintext)
     val nonce = cipher.iv
@@ -90,7 +87,7 @@ class V1Scheme(
     return EncryptResult(version, nonce, ciphertext)
   }
 
-  fun decryptWithCipher(cipher: Cipher, ciphertext: ByteArray, aad: String): ByteArray {
+  override fun decryptWithCipher(cipher: Cipher, ciphertext: ByteArray, aad: String): ByteArray {
     cipher.updateAAD(aad.toByteArray(StandardCharsets.UTF_8))
     return cipher.doFinal(ciphertext)
   }

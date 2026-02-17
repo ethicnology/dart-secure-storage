@@ -1,4 +1,4 @@
-package com.example.keystore
+package com.oubliette.keystore
 
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec

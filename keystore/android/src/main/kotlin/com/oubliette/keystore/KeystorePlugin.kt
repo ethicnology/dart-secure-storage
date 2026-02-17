@@ -1,4 +1,4 @@
-package com.example.keystore
+package com.oubliette.keystore
 
 import android.app.Activity
 import android.content.Context
@@ -62,15 +62,17 @@ class KeystorePlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   private fun handleContainsAlias(call: MethodCall, result: Result) {
-    try {
-      val alias = call.argument<String>("alias")
-        ?: run {
-          result.error("bad_args", "Missing alias.", null)
-          return
-        }
-      result.success(getKey(alias) != null)
-    } catch (e: Exception) {
-      result.error("contains_alias_failed", e.message ?: e.toString(), null)
+    val alias = call.argument<String>("alias")
+      ?: run {
+        result.error("bad_args", "Missing alias.", null)
+        return
+      }
+    cryptoHandler.post {
+      try {
+        result.success(getKey(alias) != null)
+      } catch (e: Exception) {
+        result.error("contains_alias_failed", e.message ?: e.toString(), null)
+      }
     }
   }
 
@@ -108,20 +110,22 @@ class KeystorePlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   private fun handleDeleteEntry(call: MethodCall, result: Result) {
-    try {
-      val alias = call.argument<String>("alias")
-        ?: run {
-          result.error("bad_args", "Missing alias.", null)
-          return
-        }
-      val keyStore = KeyStore.getInstance(keyStoreType)
-      keyStore.load(null)
-      if (keyStore.containsAlias(alias)) {
-        keyStore.deleteEntry(alias)
+    val alias = call.argument<String>("alias")
+      ?: run {
+        result.error("bad_args", "Missing alias.", null)
+        return
       }
-      result.success(null)
-    } catch (e: Exception) {
-      result.error("delete_entry_failed", e.message ?: e.toString(), null)
+    cryptoHandler.post {
+      try {
+        val keyStore = KeyStore.getInstance(keyStoreType)
+        keyStore.load(null)
+        if (keyStore.containsAlias(alias)) {
+          keyStore.deleteEntry(alias)
+        }
+        result.success(null)
+      } catch (e: Exception) {
+        result.error("delete_entry_failed", e.message ?: e.toString(), null)
+      }
     }
   }
 
@@ -176,7 +180,7 @@ class KeystorePlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
           return@post
         }
         val plaintext = scheme.decrypt(alias, ciphertext, nonce, aad)
-        result.success(plaintext)
+        result.success(plaintext.copyOf())
         plaintext.fill(0)
       } catch (e: Exception) {
         result.error("decrypt_failed", e.message ?: e.toString(), null)
@@ -185,12 +189,14 @@ class KeystorePlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   private fun handleIsStrongBoxAvailable(result: Result) {
-    try {
-      val available = appContext.packageManager
-        .hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE)
-      result.success(available)
-    } catch (e: Exception) {
-      result.error("is_strongbox_available_failed", e.message ?: e.toString(), null)
+    cryptoHandler.post {
+      try {
+        val available = appContext.packageManager
+          .hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE)
+        result.success(available)
+      } catch (e: Exception) {
+        result.error("is_strongbox_available_failed", e.message ?: e.toString(), null)
+      }
     }
   }
 

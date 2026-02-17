@@ -1,4 +1,4 @@
-package com.example.keystore
+package com.oubliette.keystore
 
 import kotlin.test.Test
 

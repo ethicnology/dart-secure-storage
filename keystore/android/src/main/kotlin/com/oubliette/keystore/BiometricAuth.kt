@@ -1,9 +1,10 @@
-package com.example.keystore
+package com.oubliette.keystore
 
 import android.hardware.biometrics.BiometricManager
 import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
 import android.os.CancellationSignal
+import android.util.Log
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel.Result
 import javax.crypto.Cipher
@@ -19,7 +20,7 @@ internal fun KeystorePlugin.handleAuthenticateEncrypt(call: MethodCall, result: 
       result.error("bad_args", "Missing plaintext, aad, or alias.", null)
       return
     }
-    val scheme = SchemeRegistry.schemeFor(SchemeRegistry.CURRENT_VERSION) as? V1Scheme
+    val scheme = SchemeRegistry.schemeFor(SchemeRegistry.CURRENT_VERSION)
       ?: run {
         result.error("encrypt_failed", "Unsupported version.", null)
         return
@@ -62,7 +63,7 @@ internal fun KeystorePlugin.handleAuthenticateDecrypt(call: MethodCall, result: 
       result.error("bad_args", "Missing version, ciphertext, nonce, aad, or alias.", null)
       return
     }
-    val scheme = SchemeRegistry.schemeFor(version) as? V1Scheme
+    val scheme = SchemeRegistry.schemeFor(version)
       ?: run {
         result.error("decrypt_failed", "Unsupported version.", null)
         return
@@ -72,7 +73,7 @@ internal fun KeystorePlugin.handleAuthenticateDecrypt(call: MethodCall, result: 
       onSuccess = { authenticatedCipher ->
         try {
           val decrypted = scheme.decryptWithCipher(authenticatedCipher, ciphertext, aad)
-          result.success(decrypted)
+          result.success(decrypted.copyOf())
           decrypted.fill(0)
         } catch (e: Exception) {
           result.error("decrypt_failed", e.message ?: e.toString(), null)
@@ -128,6 +129,7 @@ internal fun KeystorePlugin.authenticate(
       }
 
       override fun onAuthenticationFailed() {
+        Log.w("KeystorePlugin", "Biometric attempt failed (retrying)")
       }
 
       override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {

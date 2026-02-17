@@ -1,4 +1,4 @@
-package com.example.keystore
+package com.oubliette.keystore
 
 object SchemeRegistry {
   const val CURRENT_VERSION = 1

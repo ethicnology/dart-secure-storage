@@ -1,4 +1,6 @@
-package com.example.keystore
+package com.oubliette.keystore
+
+import javax.crypto.Cipher
 
 interface EncryptionScheme {
   val version: Int
@@ -17,6 +19,11 @@ interface EncryptionScheme {
     nonce: ByteArray,
     aad: String
   ): ByteArray
+
+  fun initEncryptCipher(alias: String): Cipher
+  fun initDecryptCipher(alias: String, nonce: ByteArray): Cipher
+  fun encryptWithCipher(cipher: Cipher, plaintext: ByteArray, aad: String): EncryptResult
+  fun decryptWithCipher(cipher: Cipher, ciphertext: ByteArray, aad: String): ByteArray
 }
 
 data class EncryptResult(
