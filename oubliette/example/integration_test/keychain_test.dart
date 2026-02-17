@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:keychain/keychain.dart';
@@ -78,6 +79,18 @@ void main() {
       await facade.secItemDelete(alias);
       final exists = await facade.contains(alias);
       expect(exists, isFalse);
+    });
+
+    testWidgets('secItemAdd twice with same alias throws PlatformException', (
+      tester,
+    ) async {
+      await facade.secItemAdd(alias, data);
+      expect(
+        () => facade.secItemAdd(alias, data),
+        throwsA(
+          isA<PlatformException>().having((e) => e.code, 'code', 'already_exists'),
+        ),
+      );
     });
   });
 

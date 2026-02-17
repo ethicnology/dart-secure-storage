@@ -80,6 +80,36 @@ void main() {
       expect(decrypted, equals(plaintext));
     });
 
+    testWidgets('decrypt returns non-zeroed plaintext bytes', (tester) async {
+      await facade.generateKey(alias: alias, unlockedDeviceRequired: false, strongBox: false);
+      final encrypted = await facade.encrypt(alias: alias, plaintext: plaintext, aad: aad);
+      final decrypted = await facade.decrypt(
+        version: encrypted.version,
+        alias: encrypted.alias,
+        ciphertext: encrypted.ciphertext,
+        nonce: encrypted.nonce,
+        aad: encrypted.aad,
+      );
+      expect(decrypted, equals(plaintext));
+      expect(decrypted.any((b) => b != 0), isTrue);
+    });
+
+    testWidgets('decrypt with wrong nonce throws PlatformException', (tester) async {
+      await facade.generateKey(alias: alias, unlockedDeviceRequired: false, strongBox: false);
+      final encrypted = await facade.encrypt(alias: alias, plaintext: plaintext, aad: aad);
+      final wrongNonce = Uint8List(12);
+      expect(
+        () => facade.decrypt(
+          version: encrypted.version,
+          alias: encrypted.alias,
+          ciphertext: encrypted.ciphertext,
+          nonce: wrongNonce,
+          aad: encrypted.aad,
+        ),
+        throwsA(isA<PlatformException>()),
+      );
+    });
+
     testWidgets('encrypt with auth key requires authentication', (tester) async {
       const authAlias = 'integration_test_auth_key';
       await facade.generateKey(

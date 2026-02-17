@@ -12,6 +12,7 @@ void main() {
     );
     const key = 'plugin_test_key';
     const value = 'hello plugin';
+    await plugin.trash(key);
     await plugin.storeString(key, value);
     final fetched = await plugin.useStringAndForget<String>(key, (v) async => v);
     expect(fetched, value);
