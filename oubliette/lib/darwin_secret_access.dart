@@ -8,7 +8,7 @@ export 'package:keychain/keychain.dart' show KeychainAccessibility;
 /// - [DarwinSecretAccess.evenLocked] — accessible even when the device is locked (after first unlock since boot).
 /// - [DarwinSecretAccess.onlyUnlocked] — accessible only while the device is unlocked.
 /// - [DarwinSecretAccess.biometric] — requires biometric/passcode auth; survives biometric enrollment changes.
-/// - [DarwinSecretAccess.biometricStrict] — requires biometric auth; invalidated if biometric enrollment changes. No passcode fallback.
+/// - [DarwinSecretAccess.biometricFatal] — requires biometric auth; invalidated if biometric enrollment changes. Item destroyed if passcode removed. No passcode fallback.
 ///
 /// ### macOS keychain backends
 ///
@@ -26,7 +26,7 @@ export 'package:keychain/keychain.dart' show KeychainAccessibility;
 ///   with a Development Certificate and the `keychain-access-groups`
 ///   entitlement — without this you get `errSecMissingEntitlement` (-34018).
 ///
-/// The [biometric] and [biometricStrict] profiles set [useDataProtection]
+/// The [biometric] and [biometricFatal] profiles set [useDataProtection]
 /// to `true` because they rely on Touch ID / Face ID which is only available
 /// through the Data Protection keychain. If you only need a macOS password
 /// prompt (no biometric), use [DarwinSecretAccess.custom] with
@@ -37,9 +37,11 @@ class DarwinSecretAccess {
   const DarwinSecretAccess.evenLocked({this.prefix = 'oubliette', this.service})
     : accessibility = KeychainAccessibility.afterFirstUnlockThisDeviceOnly,
       useDataProtection = false,
-      authenticationRequired = true,
+      authenticationRequired = false,
       biometryCurrentSetOnly = false,
-      authenticationPrompt = null;
+      authenticationPrompt = null,
+      secureEnclave = false,
+      accessGroup = null;
 
   /// Accessible only while the device is unlocked. The class key is
   /// wiped from memory on lock. Maps to
@@ -47,14 +49,19 @@ class DarwinSecretAccess {
   const DarwinSecretAccess.onlyUnlocked({
     this.prefix = 'oubliette',
     this.service,
+    required this.secureEnclave,
   }) : accessibility = KeychainAccessibility.whenUnlockedThisDeviceOnly,
        useDataProtection = false,
        authenticationRequired = false,
        biometryCurrentSetOnly = false,
-       authenticationPrompt = null;
+       authenticationPrompt = null,
+       accessGroup = null;
 
   /// Requires biometric or passcode authentication on every read.
   /// Survives biometric enrollment changes (e.g. new fingerprint).
+  ///
+  /// When [secureEnclave] is `true`, data is encrypted/decrypted
+  /// using a Secure Enclave P-256 key.
   ///
   /// Sets [useDataProtection] to `true`. On macOS this uses the Data
   /// Protection keychain which requires code signing and entitlements.
@@ -64,27 +71,38 @@ class DarwinSecretAccess {
     this.prefix = 'oubliette',
     this.service,
     required String promptReason,
+    required this.secureEnclave,
   }) : accessibility = KeychainAccessibility.whenUnlockedThisDeviceOnly,
        useDataProtection = true,
        authenticationRequired = true,
        biometryCurrentSetOnly = false,
-       authenticationPrompt = promptReason;
+       authenticationPrompt = promptReason,
+       accessGroup = null;
 
   /// Requires biometric authentication on every read. The item is
   /// **invalidated** if biometric enrollment changes — the secret
   /// becomes irrecoverable. No passcode fallback.
   ///
+  /// Uses `whenPasscodeSetThisDeviceOnly` — the item is destroyed by
+  /// the OS if the user removes their passcode, providing the
+  /// strictest protection level.
+  ///
+  /// When [secureEnclave] is `true`, data is encrypted/decrypted
+  /// using a Secure Enclave P-256 key.
+  ///
   /// Sets [useDataProtection] to `true`. On macOS this uses the Data
   /// Protection keychain which requires code signing and entitlements.
-  const DarwinSecretAccess.biometricStrict({
+  const DarwinSecretAccess.biometricFatal({
     this.prefix = 'oubliette',
     this.service,
     required String promptReason,
-  }) : accessibility = KeychainAccessibility.whenUnlockedThisDeviceOnly,
+    required this.secureEnclave,
+  }) : accessibility = KeychainAccessibility.whenPasscodeSetThisDeviceOnly,
        useDataProtection = true,
        authenticationRequired = true,
        biometryCurrentSetOnly = true,
-       authenticationPrompt = promptReason;
+       authenticationPrompt = promptReason,
+       accessGroup = null;
 
   /// Full control over every keychain parameter.
   ///
@@ -99,6 +117,8 @@ class DarwinSecretAccess {
     required this.authenticationRequired,
     required this.biometryCurrentSetOnly,
     required this.authenticationPrompt,
+    required this.secureEnclave,
+    required this.accessGroup,
   });
 
   /// Prefix prepended to every storage key in the Keychain.
@@ -131,6 +151,14 @@ class DarwinSecretAccess {
   /// Reason displayed in the system authentication dialog when reading.
   final String? authenticationPrompt;
 
+  /// When `true`, data is encrypted/decrypted using a Secure Enclave
+  /// P-256 key via `eciesEncryptionCofactorX963SHA256AESGCM`. The
+  /// private key never leaves the SE chip.
+  final bool secureEnclave;
+
+  /// `kSecAttrAccessGroup` — restricts which apps can access the item.
+  final String? accessGroup;
+
   KeychainConfig toConfig() => KeychainConfig(
     service: service,
     accessibility: accessibility,
@@ -138,5 +166,7 @@ class DarwinSecretAccess {
     authenticationRequired: authenticationRequired,
     biometryCurrentSetOnly: biometryCurrentSetOnly,
     authenticationPrompt: authenticationPrompt,
+    secureEnclave: secureEnclave,
+    accessGroup: accessGroup,
   );
 }
