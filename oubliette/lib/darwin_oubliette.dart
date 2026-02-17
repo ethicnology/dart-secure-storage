@@ -15,6 +15,9 @@ class DarwinOubliette extends Oubliette {
 
   @override
   Future<void> store(String key, Uint8List value) async {
+    if (await exists(key)) {
+      throw StateError('A value already exists for key "$key". Call trash() first.');
+    }
     await _keychain.secItemAdd(_storedKey(key), value);
   }
 

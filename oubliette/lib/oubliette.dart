@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:oubliette/android_oubliette.dart' show AndroidOubliette;
 import 'package:oubliette/android_secret_access.dart';
@@ -16,14 +16,14 @@ abstract class Oubliette {
     required AndroidSecretAccess android,
     required DarwinSecretAccess darwin,
   }) {
-    switch (Platform.operatingSystem) {
-      case 'ios':
-      case 'macos':
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return DarwinOubliette(access: darwin);
-      case 'android':
+      case TargetPlatform.android:
         return AndroidOubliette(access: android);
       default:
-        throw UnsupportedError('Unsupported platform');
+        throw UnsupportedError('Unsupported platform: $defaultTargetPlatform');
     }
   }
 
@@ -64,8 +64,9 @@ abstract class Oubliette {
   ///   optimise away the `fillRange` call, though this is unlikely in
   ///   practice for `Uint8List`.
   Future<T?> useAndForget<T>(String key, Future<T> Function(Uint8List bytes) action) async {
-    final bytes = await fetch(key);
-    if (bytes == null) return null;
+    final raw = await fetch(key);
+    if (raw == null) return null;
+    final bytes = Uint8List.fromList(raw);
     try {
       return await action(bytes);
     } finally {

@@ -14,7 +14,10 @@ class AndroidOubliette extends Oubliette {
 
   String _storedKey(String key) => access.prefix + key;
 
-  Future<void> _ensureKey() => _ensureKeyFuture ??= _doEnsureKey();
+  Future<void> _ensureKey() => _ensureKeyFuture ??= _doEnsureKey().onError((e, st) {
+    _ensureKeyFuture = null;
+    throw e!;
+  });
 
   Future<void> _doEnsureKey() async {
     final exists = await _keystore.containsAlias(access.keyAlias);
@@ -31,6 +34,9 @@ class AndroidOubliette extends Oubliette {
 
   @override
   Future<void> store(String key, Uint8List value) async {
+    if (await exists(key)) {
+      throw StateError('A value already exists for key "$key". Call trash() first.');
+    }
     final storedKey = _storedKey(key);
     await _ensureKey();
     final ep = await _keystore.encrypt(
