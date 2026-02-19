@@ -25,6 +25,9 @@ class _FakeOubliette extends Oubliette {
   }
 
   @override
+  Future<void> init() async {}
+
+  @override
   Future<bool> exists(String key) async => _store.containsKey(key);
 }
 

@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:keystore/keystore.dart';
 import 'package:oubliette/oubliette.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,18 +9,14 @@ class AndroidOubliette extends Oubliette {
   final Keystore _keystore = Keystore();
   final AndroidSecretAccess access;
 
-  Future<void>? _ensureKeyFuture;
-
   String _storedKey(String key) => access.prefix + key;
 
-  Future<void> _ensureKey() => _ensureKeyFuture ??= _doEnsureKey().onError((e, st) {
-    _ensureKeyFuture = null;
-    throw e!;
-  });
-
-  Future<void> _doEnsureKey() async {
+  @override
+  Future<void> init() async {
     final exists = await _keystore.containsAlias(access.keyAlias);
-    if (!exists) {
+    if (exists) {
+      debugPrint('[Oubliette] Android key already exists: ${access.keyAlias}');
+    } else {
       await _keystore.generateKey(
         alias: access.keyAlias,
         unlockedDeviceRequired: access.unlockedDeviceRequired,
@@ -29,6 +24,7 @@ class AndroidOubliette extends Oubliette {
         userAuthenticationRequired: access.userAuthenticationRequired,
         invalidatedByBiometricEnrollment: access.invalidatedByBiometricEnrollment,
       );
+      debugPrint('[Oubliette] Android key generated: ${access.keyAlias}');
     }
   }
 
@@ -38,7 +34,6 @@ class AndroidOubliette extends Oubliette {
       throw StateError('A value already exists for key "$key". Call trash() first.');
     }
     final storedKey = _storedKey(key);
-    await _ensureKey();
     final ep = await _keystore.encrypt(
       alias: access.keyAlias,
       plaintext: value,

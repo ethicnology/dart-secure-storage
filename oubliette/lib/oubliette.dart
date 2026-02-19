@@ -26,6 +26,12 @@ abstract class Oubliette {
 
   Oubliette.internal();
 
+  /// Ensures the platform encryption key exists, generating it if needed.
+  ///
+  /// Must be awaited once after construction and before any [store]/[fetch]
+  /// call. Subsequent calls are no-ops (idempotent).
+  Future<void> init();
+
   Future<void> store(String key, Uint8List value);
 
   @protected

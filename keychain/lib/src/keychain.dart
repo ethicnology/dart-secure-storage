@@ -116,6 +116,18 @@ final class Keychain {
     );
   }
 
+  /// Ensures the Secure Enclave key pair for this config's [service] exists,
+  /// generating it if needed.
+  ///
+  /// Returns `true` if the key already existed, `false` if it was just created.
+  Future<bool> ensureEnclaveKeyPair() async {
+    final result = await _channel.invokeMethod<bool>(
+      'ensureEnclaveKeyPair',
+      {if (config.service != null) 'service': config.service},
+    );
+    return result ?? false;
+  }
+
   Future<void> secItemAdd(String alias, Uint8List data) async {
     await _channel.invokeMethod<void>('secItemAdd', {
       ..._args(alias),

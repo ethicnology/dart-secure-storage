@@ -27,6 +27,8 @@ public class KeychainPlugin: NSObject, FlutterPlugin {
       handleSecItemDelete(call, result: result)
     case "keychainContains":
       handleKeychainContains(call, result: result)
+    case "ensureEnclaveKeyPair":
+      handleEnsureEnclaveKeyPair(call, result: result)
     default:
       result(FlutterError(code: "not_implemented", message: "\(call.method) is not implemented.", details: nil))
     }
@@ -144,6 +146,33 @@ public class KeychainPlugin: NSObject, FlutterPlugin {
           result(FlutterError(code: "sec_item_copy_failed", message: String(status), details: nil))
         }
       }
+    }
+  }
+
+  private func handleEnsureEnclaveKeyPair(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    let service = (call.arguments as? [String: Any]).flatMap { $0["service"] as? String }
+    serialQueue.async {
+      guard let tag = enclaveKeyTag(service: service) else {
+        DispatchQueue.main.async {
+          result(FlutterError(code: "bad_args", message: "Could not compute key tag.", details: nil))
+        }
+        return
+      }
+      let fetchQuery: [String: Any] = [
+        kSecClass as String: kSecClassKey,
+        kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
+        kSecAttrApplicationTag as String: tag,
+        kSecAttrTokenID as String: kSecAttrTokenIDSecureEnclave,
+        kSecReturnRef as String: false
+      ]
+      let alreadyExisted = SecItemCopyMatching(fetchQuery as CFDictionary, nil) == errSecSuccess
+      guard ensureEnclaveKeyPair(service: service) != nil else {
+        DispatchQueue.main.async {
+          result(FlutterError(code: "se_key_gen_failed", message: "Could not ensure SE key pair.", details: nil))
+        }
+        return
+      }
+      DispatchQueue.main.async { result(alreadyExisted) }
     }
   }
 
